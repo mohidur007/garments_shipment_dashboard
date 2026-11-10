@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Today's Shipment Schedule</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="hero">
+  <img id="logo" alt="Company logo" hidden>
+  <h1 id="company">Loading...</h1>
+  <p class="campus" id="campus"></p>
+  <div class="sched">
+    <h2>Today's Shipment Schedule</h2>
+    <span class="pill" id="today"></span>
+    <span class="pill" id="updated" hidden></span>
+  </div>
+  <div class="sbox">
+    <div class="sin">
+      <div class="sbar" id="sbar">
+        <input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="Search PO / Style No" aria-label="Search PO number or Style No">
+        <button id="qgo" type="button" aria-label="Search"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
+      </div>
+      <div id="sugg" class="sugg" hidden></div>
+    </div>
+  </div>
+</header>
+
+<p id="status" class="status">Reading data.xlsx ...</p>
+
+<main id="app" hidden>
+  <section class="filters">
+    <label>Floor <select id="f-floor"></select></label>
+    <label>Brand <select id="f-brand"></select></label>
+    <label>Style <select id="f-style"></select></label>
+    <label>Inspection Type <select id="f-insp"></select></label>
+    <label>CCD <select id="f-ccd"></select></label>
+    <label>Schedule <select id="f-sec"></select></label>
+    <label>Chart
+      <select id="f-chart">
+        <option value="bar">Bar</option>
+        <option value="doughnut">Doughnut</option>
+        <option value="pie">Pie</option>
+        <option value="line">Line</option>
+      </select>
+    </label>
+    <button id="reset" type="button">Clear filters</button>
+  </section>
+
+  <section class="board">
+    <div class="panel">
+      <div class="kpis">
+        <div class="kpi k1"><b id="kpi-rows">0</b><small>Total Style</small><em id="kpi-rows-s"></em></div>
+        <div class="kpi k2 go" id="k-final" role="button" tabindex="0"><b id="kpi-final">0</b><small>Final Completed</small><em id="kpi-final-q"></em></div>
+        <div class="kpi k3"><b id="kpi-qty">0</b><small>Total QTY</small><em id="kpi-qty-s"></em></div>
+      </div>
+      <h3>Floor</h3>
+      <div class="chips floors" id="g-floor"></div>
+      <h3>Inspection</h3>
+      <div class="chips insp" id="g-insp"></div>
+      <h3>Brand</h3>
+      <div class="chips" id="g-brand"></div>
+    </div>
+    <div class="side">
+    <div class="panel chart-panel">
+      <div class="by" id="by">
+        <button type="button" data-d="floor" class="on">By Floor</button>
+        <button type="button" data-d="brand">By Brand</button>
+        <button type="button" data-d="insp">By Inspection</button>
+        <button type="button" data-d="ccd">By CCD</button>
+      </div>
+      <div class="chart-wrap"><canvas id="chart"></canvas></div>
+    </div>
+    <div class="panel outs">
+      <div class="out">
+        <b>Print Dashboard</b>
+        <div class="btns"><button type="button" class="gbtn" data-act="pd"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><rect x="6" y="14" width="12" height="7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/></svg> Print</button><button type="button" class="gbtn alt" data-act="dd"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg> Download PDF</button></div>
+      </div>
+      <div class="out">
+        <b>Print Excel File</b>
+        <div class="btns"><button type="button" class="gbtn" data-act="px"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><rect x="6" y="14" width="12" height="7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/></svg> Print</button><button type="button" class="gbtn alt" data-act="dx"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg> Download Excel</button></div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <p class="hint">Click any row to see its details.</p>
+    <div class="tbl"><table id="table"></table></div>
+  </section>
+</main>
+
+<div class="modal" id="modal" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mtitle">
+    <button id="mclose" type="button" aria-label="Close">&times;</button>
+    <h2 id="mtitle"></h2>
+    <p id="msub"></p>
+    <div class="mcards" id="mcards"></div>
+  </div>
+</div>
+
+<div id="pview"></div>
+<div id="xprint"></div>
+
+<script src="libs/xlsx.full.min.js" charset="utf-8"></script>
+<script src="libs/chart.umd.min.js" charset="utf-8"></script>
+<script src="libs/exceljs.min.js" charset="utf-8"></script>
+<script src="libs/html2canvas.min.js" charset="utf-8"></script>
+<script src="script.js"></script>
+</body>
+</html>
